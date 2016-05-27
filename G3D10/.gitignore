@@ -1,4 +1,4 @@
+*.csv
+*.pyc
 build
 temp
-bin/ice/*.pyc
-bin/ice/__pycache__

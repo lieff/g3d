@@ -1,0 +1,21 @@
+The sample program creates a deep G-Buffer using depth peeling, which is straightforward but slow.
+
+This directory contains a reference implementation to generate a two-layer Deep G-Buffer in a single shading pass using the technique from:
+
+> Mara, McGuire, Nowrouzezahrai, and Luebke, Deep G-Buffers for Stable Global Illumination
+> Approximation, submitted to ACM Transactions on Graphics, January 2016
+
+If your GPU has the NV_viewport_array2 and NV_geometry_shader_passthroughextensions (NVIDIA Maxwell and later GUs), then these shaders implement the "Reproject Optimized" variant described in that paper. Otherwise, they automatically fall back to the "Reproject" variant.
+
+To use these reference shaders in your own system, implement all of the "TODO" lines that are application specific. 
+
+From CPU code, set up a G-Buffer with each render target having two layers 
+(allocate each texture with glTexImage3D), and bind it 
+to the framebuffer. Set up two viewports (via glViewportArray); the second one can be 
+lower resolution. Bind all necessary uniforms and vertex attributes (see the top of the 
+vertex and pixel shaders).
+
+
+
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>

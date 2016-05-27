@@ -1,0 +1,22 @@
+#version 440
+
+uniform mat4x3  previousObjectToCameraMatrix;
+uniform mat4x3  objectToCameraMatrix;
+uniform mat4    projectionMatrix;
+
+in vec3 g3d_Vertex;
+
+out layout(location = 0) vec3 csPosition;
+out layout(location = 1) vec3 csPrevPosition;
+
+// TODO: Declare any other necessary attributes as needed (texCoords, normals, tangents)
+
+void main(void) {
+    vec4 vertex = vec4(g3d_Vertex, 1.0);
+    csPosition = (objectToCameraMatrix * vertex).xyz;
+    csPrevPosition = (previousObjectToCameraMatrix * vertex).xyz;
+
+    // TODO: Handle any other necessary attributes as needed (texCoords, normals, tangents)
+
+    gl_Position = projectionMatrix * csPosition;
+}

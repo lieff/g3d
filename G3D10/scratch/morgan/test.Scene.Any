@@ -1,0 +1,154 @@
+/* -*- c++ -*- */
+{ 
+    entities = { 
+        
+        
+        camera = Camera { 
+            depthOfFieldSettings = DepthOfFieldSettings { 
+                enabled = false; 
+                farBlurRadiusFraction = 0.005; 
+                farBlurryPlaneZ = -100; 
+                farSharpPlaneZ = -40; 
+                focusPlaneZ = -10; 
+                lensRadius = 0.01; 
+                model = "ARTIST"; 
+                nearBlurRadiusFraction = 0.015; 
+                nearBlurryPlaneZ = -0.05; 
+                nearSharpPlaneZ = -0.1; 
+            }; 
+            
+            filmSettings = FilmSettings { 
+                antialiasingEnabled = true; 
+                antialiasingFilterRadius = 0; 
+                antialiasingHighQuality = true; 
+                bloomRadiusFraction = 0.01796; 
+                bloomStrength = 0.1; 
+                debugZoom = 1; 
+                gamma = 2.2; 
+                sensitivity = 1; 
+                
+                vignetteBottomStrength = 0.05; 
+                vignetteSizeFraction = 0.17; 
+                vignetteTopStrength = 0.5; 
+            }; 
+            
+            frame = CFrame::fromXYZYPRDegrees(2.5936, -0.22115, -8.6714, 179.84, 0.64592, 0); 
+            motionBlurSettings = MotionBlurSettings { 
+                cameraMotionInfluence = 0.5; 
+                enabled = false; 
+                exposureFraction = 0.75; 
+                maxBlurDiameterFraction = 0.1; 
+                numSamples = 27; 
+            }; 
+            
+            projection = Projection { 
+                farPlaneZ = -50; 
+                fovDegrees = 35; 
+                fovDirection = "VERTICAL"; 
+                nearPlaneZ = -0.5; 
+                pixelOffset = Vector2(0, 0 ); 
+            }; 
+            
+            visualizationScale = 1; 
+        }; 
+
+        ground = VisibleEntity { 
+            canChange = false; 
+            frame = CFrame::fromXYZYPRDegrees(0, -1, 0, 0 ); 
+            model = "groundModel"; 
+             
+        }; 
+        
+        
+        oldGirderBox = VisibleEntity { 
+            canChange = false; 
+            frame = CFrame::fromXYZYPRDegrees(2.09392, -0.440751, -3.2886 ); 
+            model = "oldGirderBoxModel";              
+        }; 
+
+
+        sun = Light { 
+            attenuation = ( 0.0001, 0, 1 ); 
+            bulbPower = Color3(50000 ); 
+            canChange = false; 
+            castsShadows = true; 
+            enabled = true; 
+            frame = CFrame::fromXYZYPRDegrees(-15.1351, 36.5859, -14.5709, -135.458, -59.5992, 5.45791 ); 
+            nearPlaneZLimit = -30; 
+            producesDirectIllumination = true; 
+            producesIndirectIllumination = true; 
+            shadowMapSize = Vector2int16(4096, 4096 ); 
+            spotHalfAngleDegrees = 15; 
+            spotSquare = true; 
+            stochasticShadows = true;
+            type = "SPOT"; 
+        }; 
+        
+        
+    }; 
+    
+    lightingEnvironment = LightingEnvironment { 
+        ambientOcclusionSettings = AmbientOcclusionSettings { 
+            bias = 0.012; 
+            blurRadius = 4; 
+            blurStepSize = 2; 
+            depthPeelSeparationHint = 0.872287; 
+            edgeSharpness = 1; 
+            enabled = false; 
+            intensity = 1; 
+            monotonicallyDecreasingBilateralWeights = false; 
+            numSamples = 19; 
+            radius = 1.5; 
+            temporalFilterSettings = TemporalFilter::Settings { 
+                hysteresis = 0; 
+                falloffEndDistance = 0.07; 
+                falloffStartDistance = 0.05; 
+            }; 
+            
+            temporallyVarySamples = false; 
+            useDepthPeelBuffer = true; 
+            useNormalBuffer = true; 
+            useNormalsInBlur = true; 
+        }; 
+        
+        environmentMap = Texture::Specification { 
+            encoding = Texture::Encoding { 
+                readMultiplyFirst = 0.5; 
+            }; 
+            
+            filename = "cubemap/uffizi/uffizi*.jpg"; 
+        }; 
+        
+    }; 
+    
+    models = { 
+      
+        groundModel = ArticulatedModel::Specification { 
+            filename = "ifs/squarex8.ifs"; 
+            preprocess = ( 
+                setCFrame(root(), CFrame::fromXYZYPRDegrees(0, 0, 0, 0, -90, 0 ) ); 
+                setTwoSided("mesh", true ); 
+                setMaterial(all(), UniversalMaterial::Specification { 
+                         lambertian = Texture::Specification {
+                            filename = "material/uvcheckermap/orange-1024.png"; 
+                            encoding = Texture::Encoding {
+                                readMultiplyFirst = 0.8;
+                            };
+                        };
+                    } ) ); 
+            
+            scale = 15; 
+        }; 
+                
+        oldGirderBoxModel = ArticulatedModel::Specification { 
+            filename = "model/cube/cube.ifs"; 
+            preprocess = ( 
+                setTwoSided(all(), true ); 
+                setMaterial(all(), #include("material/oldgirder/oldgirder.UniversalMaterial.Any")) ); 
+            
+        }; 
+            
+    }; 
+    
+    name = "Test"; 
+} 

@@ -1,0 +1,78 @@
+#version 440 // -*- c++ -*-
+
+uniform sampler2D   previousDepth_buffer;
+uniform vec2        currentDepth_invSize;
+
+/** Minimum depth buffer value distance (on [0,1]) that new faces
+    must be beyond previousDepthBuffer to be written. */
+uniform float     minZSeparation;
+
+/** Projection matrix constants describing the viewport 
+  (see G3D::Projection documentation) */
+uniform float3    clipInfo;
+
+uniform mat4 projectToScreenMatrix;
+
+in layout(location = 0) vec3 csPosition;
+in layout(location = 1) vec3 csPrevPosition;
+
+// ...
+// TODO: Declare application-specific attributes here
+
+in int gl_Layer;
+
+// TODO: Declare application-specific GBuffer targets here.
+// For this example, we will write only the camera space 
+// position and the change in screen-space position.
+out layout(location = 0) vec3 csPosition_target;
+out layout(location = 1) vec3 ssPosition_target;
+
+/*
+Clipping plane constants for use by reconstructZ
+
+\param clipInfo = (z_f == -inf()) ? Vector3(z_n, -1.0f, 1.0f) : Vector3(z_n * z_f,  z_n - z_f,  z_f);
+\sa G3D::Projection::reconstructFromDepthClipInfo
+*/
+float reconstructCSZ(float d, vec3 clipInfo) {
+    return clipInfo[0] / (clipInfo[1] * d + clipInfo[2]);
+}
+
+vec2 getSSPositionChange(vec3 csPosition, vec3 csPrevPosition, mat4 projectToScreenMatrix) {
+    vec4 temp = projectToScreenMatrix * vec4(csPrevPosition, 1.0);
+
+    // gl_FragCoord.xy has already been rounded to a pixel center, so regenerate the true projected position.
+    // This is needed to generate correct velocity vectors in the presence of Projection::pixelOffset
+    vec4 temp2 = projectToScreenMatrix * vec4(csPosition, 1.0);
+
+    // We want the precision of division here and intentionally do not convert to multiplying by an inverse.
+    // Expressing the two divisions as a single vector division operation seems to prevent the compiler from
+    // computing them at different precisions, which gives non-zero velocity for static objects in some cases.
+    vec4 ssPositions = vec4(temp.xy, temp2.xy) / vec4(temp.ww, temp2.ww);
+
+    return ssPositions.zw - ssPositions.xy;
+}
+
+bool isInFrontOfSecondLayer(in vec2 ssV, in sampler2D prevDepthBuffer,
+            in float minZGap, in vec2 fragCoord, in float prevZ, in vec3 clipInfo, in vec2 invCurrentSize) {
+    vec2 prevSSC = fragCoord - ssV;
+    float oldDepth = texture(prevDepthBuffer, prevSSC * invCurrentSize).r;
+    float oldZ = reconstructCSZ(oldDepth, clipInfo);
+    float currentZ = prevZ;
+    return oldZ <= currentZ + minZGap;
+}
+
+void main() {
+
+    vec2 ssPositionChange = getSSPositionChange(csPosition, csPrevPosition, projectToScreenMatrix);
+
+    if ((gl_Layer == 1) && isInFrontOfSecondLayer(ssPositionChange, previousDepth_buffer, 
+                          minZSeparation, 
+                          gl_FragCoord.xy, csPrevPosition.z, 
+                          clipInfo, currentDepth_invSize)) {
+        discard;
+    }
+
+    // TODO: Application-specific writing to the G-Buffer
+    csPosition_target = csPosition;
+    ssPositionChange_target = ssPositionChange;
+}

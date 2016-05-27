@@ -1,0 +1,3 @@
+#version 330
+/* Only used on OS X, as a null pixel shader */
+void main() { }

@@ -30,6 +30,7 @@ void main() {
     if (dot(csN, csN) < 0.01) {
         // This is a background pixel, not part of an object
         discard;
+        wsN = Vector3(0.0);
     } else {
         wsN = normalize(mat3x3(gbuffer_camera_frame) * (csN * gbuffer_CS_NORMAL_readMultiplyFirst.xyz + gbuffer_CS_NORMAL_readAddSecond.xyz));
     }

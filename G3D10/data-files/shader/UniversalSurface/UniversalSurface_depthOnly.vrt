@@ -39,6 +39,8 @@ void main() {
     vec2 tex0, tex1;
 #   if (HAS_ALPHA != 0)
         tex0      = g3d_TexCoord0;
+#   else
+        tex0      = vec2(0.0);
 #   endif
     UniversalSurface_customOSVertexTransformation(vertex, normal, packedTangent, tex0, tex1);
 

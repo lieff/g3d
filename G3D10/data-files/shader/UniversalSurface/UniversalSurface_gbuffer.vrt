@@ -9,6 +9,9 @@
 
 #expect HAS_BONES
 
+#if HAS_VERTEX_COLOR
+    in vec4 g3d_VertexColor;
+#endif
 
 #if HAS_BONES > 0
     in vec4      g3d_BoneWeights;

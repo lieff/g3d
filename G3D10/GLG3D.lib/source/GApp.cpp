@@ -42,11 +42,13 @@
 
 #include <time.h>
 
+#ifdef _WIN32
 // Force discrete GPU on Optimus
 // http://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
 extern "C" {
     _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 }
+#endif
 
 namespace G3D {
 

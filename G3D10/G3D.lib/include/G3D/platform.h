@@ -364,7 +364,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {\
 #if (defined(__GNUC__) && defined(__APPLE__)) || defined(__linux__)
 #include <ciso646> // Defines _LIBCC_VERSION if linking against libc++ or does nothing
 #endif
-#if (!defined(_LIBCPP_VERSION) && defined(__APPLE__)) || (!defined(_LIBCPP_VERSION) && defined(__linux__))
+#if (!defined(_LIBCPP_VERSION) && defined(__APPLE__)) || (defined(__GNUC__) && !defined(__clang__) && (__GNUC__ < 5))
 #   include <tr1/memory>
     using std::tr1::shared_ptr;
     using std::tr1::weak_ptr;

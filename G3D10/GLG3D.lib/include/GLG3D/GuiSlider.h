@@ -89,6 +89,7 @@ private:
           m_upperLimitInf(upperLimitInf) {
 
         // If the slider bounds include zero then set the log base on the absalout value of the largest value
+        m_range = m_high - m_low;
         if ((m_low < 0) && (m_high > 0)) {
             m_containsZero = true;
             m_base = max(max(abs(m_low), m_high) / LOG_BASE_SCALE, MAX_LOG_BASE);
@@ -97,7 +98,6 @@ private:
             m_base = max(MAX_LOG_BASE, m_range / LOG_BASE_SCALE);
         }
 
-        m_range = m_high - m_low;
         m_logBase = ::log(m_base);
     }
 

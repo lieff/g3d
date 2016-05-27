@@ -292,6 +292,7 @@ def buildNativeFFmpeg():
     if not os.path.exists(tarname):
         print('\nDecompressing gzipped file')
         ice.utils.shell('gunzip -c ' + tarname + '.gz' + ' > ' + tarname)
+        doClean = True
 
     tarObject = tarfile.open(tarname)
     ffmpegName = tarObject.next().name

@@ -201,9 +201,9 @@ static void toMaterialSpecification(
     Color3 emissiveColor(aiEmissive.r, aiEmissive.g, aiEmissive.b);
     if (! emissiveFilename.empty()) {
         aiTextureOp operation;
-        mat->Get(_AI_MATKEY_TEXOP_BASE, aiTextureType_EMISSIVE, 0, operation);
+        aiReturn ret = mat->Get(_AI_MATKEY_TEXOP_BASE, aiTextureType_EMISSIVE, 0, operation);
         int textureCount = mat->GetTextureCount(aiTextureType_EMISSIVE);
-        if ((textureCount == 1) && (operation > 5)) {
+        if ((textureCount == 1) || (ret != AI_SUCCESS || operation > 5)) {
             Texture::Specification s(emissiveFilename, true);
             s.encoding.readMultiplyFirst = emissiveColor;
             spec.setEmissive(s);
@@ -269,9 +269,9 @@ static void toMaterialSpecification(
     transmissiveColor = Color3(aiTransparent.r, aiTransparent.g, aiTransparent.b) * opacity;
     if (! transmissiveFilename.empty()) {
         aiTextureOp operation;
-        mat->Get(_AI_MATKEY_TEXOP_BASE, aiTextureType_OPACITY, 0, operation);
+        aiReturn ret = mat->Get(_AI_MATKEY_TEXOP_BASE, aiTextureType_OPACITY, 0, operation);
         int textureCount = mat->GetTextureCount(aiTextureType_OPACITY);
-        if ((textureCount == 1) && (operation > 5)) {
+        if ((textureCount == 1) && (ret != AI_SUCCESS || operation > 5)) {
             //spec.setTransmissive(transmissiveFilename, transmissiveColor);
         } else {
             spec.setTransmissive(getCombinedTexture(transmissiveColor, 
@@ -325,6 +325,15 @@ class AssimpNodesToArticulatedModelParts {
                 geom->cpuVertexArray.hasTexCoord1 = mesh->HasTextureCoords(1);
                 geom->cpuVertexArray.hasTangent = mesh->HasTangentsAndBitangents();
                 geom->cpuVertexArray.hasVertexColors = mesh->HasVertexColors(0);
+                if (geom->cpuVertexArray.hasVertexColors)
+                {   // detect if we really need vertex array (fixes some fbx files, bug im vertexColors processing?)
+                    unsigned int v;
+                    for (v = 0; v < mesh->mNumVertices; ++v) {
+                        if (mesh->mColors[0][v].r != 1.0 || mesh->mColors[0][v].g != 1.0 || mesh->mColors[0][v].b != 1.0 || mesh->mColors[0][v].a != 1.0)
+                            break;
+                    }
+                    geom->cpuVertexArray.hasVertexColors = (v != mesh->mNumVertices);
+                }
 
                 if (geom->cpuVertexArray.hasTexCoord1) {
                     geom->cpuVertexArray.texCoord1.resize(vertex.size());
@@ -355,10 +364,10 @@ class AssimpNodesToArticulatedModelParts {
                     if (mesh->HasTextureCoords(0)) {
                         getVector2(vtx.texCoord0, mesh->mTextureCoords[0][v]);
                     }
-                    if (mesh->HasTextureCoords(1)) {
+                    if (geom->cpuVertexArray.hasTexCoord1) {
                         getPoint2unorm16(geom->cpuVertexArray.texCoord1[v + indexOffset], mesh->mTextureCoords[1][v]);
                     }
-                    if (mesh->HasVertexColors(0)) {
+                    if (geom->cpuVertexArray.hasVertexColors) {
                         getColor4(geom->cpuVertexArray.vertexColors[v + indexOffset], mesh->mColors[0][v]);
                     }
                 }
@@ -419,7 +428,7 @@ class AssimpNodesToArticulatedModelParts {
                         g3dMesh->cpuIndexArray[i*3 + j] = mesh->mFaces[i].mIndices[j] + indexOffset;
                     }
                 }
-                g3dMesh->twoSided = false;
+                g3dMesh->twoSided = true;
                 g3dMesh->primitive = PrimitiveType::TRIANGLES;
                 if ( materials.size() > 0 ) {
                     g3dMesh->material = materials[mesh->mMaterialIndex];
@@ -478,7 +487,6 @@ public:
             
         }
 
-        
         if ( boneTable.size() > 0 ) {
             articulatedModel->m_boneArray.resize(boneTable.size());
             for ( Table<String, int>::Iterator it = boneTable.begin();
@@ -533,7 +541,7 @@ public:
                 articulatedModel->m_boneArray[i]->inverseBindPoseTransform = inverseBindPoseTransforms[i];
             }
         }
-        
+
         for (int i = 0; i < animationCount; ++i) {
             const aiAnimation* aiAnim = assimpAnimations[i];
             ArticulatedModel::Animation& animation = articulatedModel->m_animationTable.getCreate(aiAnim->mName.C_Str());
@@ -571,6 +579,8 @@ public:
                 // Get position spline
                 for (unsigned int i = 0; i < aiChannel->mNumPositionKeys; ++i) {
                     getPoint3(currentPhysicsFrame.translation, aiChannel->mPositionKeys[i].mValue);
+                    if (positionSpline.time.size() && !(aiChannel->mPositionKeys[i].mTime > positionSpline.time.last()))
+                        continue; // in some fbx files double to float convestion makes next key time same
                     positionSpline.append(float(aiChannel->mPositionKeys[i].mTime), currentPhysicsFrame);
                 }
                 positionSpline.finalInterval = float(positionSpline.time.first() + (animation.duration - positionSpline.time.last()));
@@ -589,6 +599,8 @@ public:
                             currentPhysicsFrame.rotation /= currentPhysicsFrame.rotation.magnitude();
                         }
                     }
+                    if (rotationSpline.time.size() && !(aiChannel->mRotationKeys[i].mTime > rotationSpline.time.last()))
+                        continue; // in some fbx files double to float convestion makes next key time same
                     rotationSpline.append(float(aiChannel->mRotationKeys[i].mTime), currentPhysicsFrame);
                 }
                 rotationSpline.finalInterval = float(rotationSpline.time.first() + (animation.duration - rotationSpline.time.last()));

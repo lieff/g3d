@@ -214,28 +214,28 @@ void App::makeGUI() {
     pane->addLabel(GuiText("Deep G-Buffers for Stable Global Illumination Approximation", m_titleFont, 11))->moveBy(3, -10);
     pane->addLabel(GuiText("by M. Mara, M. McGuire, D. Nowrouzezahrai, and D. Luebke", m_titleFont, 11))->moveBy(3, -10);
 
-	GuiTabPane* modePane = pane->addTabPane((int*)&m_demoSettings.demoMode);
-	modePane->moveBy(-10, 0);
+    GuiTabPane* modePane = pane->addTabPane((int*)&m_demoSettings.demoMode);
+    modePane->moveBy(-10, 0);
 
-	GuiPane* aoPane = modePane->addTab("AO");
+    GuiPane* aoPane = modePane->addTab("AO");
 
-	aoPane->addLabel("Deep G-buffers make screen-space ambient")->moveBy(5, 0);
-	aoPane->addLabel("occlusion robust to overlapping geometry")->moveBy(5, -8);
-	aoPane->addLabel("and changing viewpoint.")->moveBy(5, -8);
+    aoPane->addLabel("Deep G-buffers make screen-space ambient")->moveBy(5, 0);
+    aoPane->addLabel("occlusion robust to overlapping geometry")->moveBy(5, -8);
+    aoPane->addLabel("and changing viewpoint.")->moveBy(5, -8);
 
-	aoPane->addCheckBox("Enable Two-Layer Deep G-Buffer", &m_demoSettings.twoLayerAO)->moveBy(0, 10);
+    aoPane->addCheckBox("Enable Two-Layer Deep G-Buffer", &m_demoSettings.twoLayerAO)->moveBy(0, 10);
 
-	GuiPane* radiosityPane = modePane->addTab("Radiosity");
-	radiosityPane->addLabel("Deep G-buffers make screen space effects stable")->moveBy(5, 0);
-	radiosityPane->addLabel("enough to upgrade an AO pass into full indirect")->moveBy(5, -8);
-	radiosityPane->addLabel("radiosity lighting at little additional cost.")->moveBy(5, -8);
+    GuiPane* radiosityPane = modePane->addTab("Radiosity");
+    radiosityPane->addLabel("Deep G-buffers make screen space effects stable")->moveBy(5, 0);
+    radiosityPane->addLabel("enough to upgrade an AO pass into full indirect")->moveBy(5, -8);
+    radiosityPane->addLabel("radiosity lighting at little additional cost.")->moveBy(5, -8);
 
-	GuiPane* variationPane = modePane->addTab("Variations");
-	variationPane->addLabel("The AO and Radiosity modes have all useful")->moveBy(5, 0);
-	variationPane->addLabel("lighting terms enabled. This panel exposes")->moveBy(5, -8);
-	variationPane->addLabel("controls visualizing partial results.")->moveBy(5, -8);
+    GuiPane* variationPane = modePane->addTab("Variations");
+    variationPane->addLabel("The AO and Radiosity modes have all useful")->moveBy(5, 0);
+    variationPane->addLabel("lighting terms enabled. This panel exposes")->moveBy(5, -8);
+    variationPane->addLabel("controls visualizing partial results.")->moveBy(5, -8);
 
-	GuiPane* lightingPane = radiosityPane->addPane("", GuiTheme::NO_PANE_STYLE);
+    GuiPane* lightingPane = radiosityPane->addPane("", GuiTheme::NO_PANE_STYLE);
     lightingPane->moveBy(0, 10);
     lightingPane->addRadioButton("Deep G-Buffer Radiosity", DemoSettings::GlobalIlluminationMode::RADIOSITY,  &m_demoSettings.globalIlluminationMode);
     lightingPane->beginRow(); {
@@ -254,22 +254,22 @@ void App::makeGUI() {
     lightingPane->addRadioButton("Prerendered Light Probe", DemoSettings::GlobalIlluminationMode::STATIC_LIGHT_PROBE,   &m_demoSettings.globalIlluminationMode)->moveBy(0, 1);
     lightingPane->addRadioButton("Split Screen Comparison", DemoSettings::GlobalIlluminationMode::SPLIT_SCREEN,         &m_demoSettings.globalIlluminationMode);
 
-	lightingPane->addCheckBox("Animated Light Rig", &m_demoSettings.dynamicLights)->moveBy(0, 15);
+    lightingPane->addCheckBox("Animated Light Rig", &m_demoSettings.dynamicLights)->moveBy(0, 15);
 
     lightingPane->pack();
     lightingPane->setWidth(GUI_WIDTH);
 
-	radiosityPane->pack();
-	modePane->pack();
+    radiosityPane->pack();
+    modePane->pack();
 
-	variationPane->addCheckBox("Enable Two-Layer Deep G-Buffer", &m_demoSettings.twoLayerRadiosity)->moveBy(0, 10);
+    variationPane->addCheckBox("Enable Two-Layer Deep G-Buffer", &m_demoSettings.twoLayerRadiosity)->moveBy(0, 10);
     variationPane->addCheckBox("Ambient Obscurance", &m_demoSettings.aoEnabled);
     variationPane->addCheckBox("Light Probe Fallback", &m_demoSettings.lightProbeFallback);
-	variationPane->addCheckBox("Animated Light Rig", &m_demoSettings.dynamicLights);
-	variationPane->pack();
+    variationPane->addCheckBox("Animated Light Rig", &m_demoSettings.dynamicLights);
+    variationPane->pack();
 
     GuiPane* cameraPane = pane->addPane("Camera", GuiTheme::SIMPLE_PANE_STYLE);
-	cameraPane->moveBy(0, 5);
+    cameraPane->moveBy(0, 5);
     cameraPane->addRadioButton("Static",  DemoSettings::CameraMode::STATIC,   &m_demoSettings.cameraMode);
     cameraPane->addRadioButton("Dynamic", DemoSettings::CameraMode::DYNAMIC,  &m_demoSettings.cameraMode);
     cameraPane->addRadioButton("Manual ", DemoSettings::CameraMode::FREE,     &m_demoSettings.cameraMode);
@@ -322,10 +322,10 @@ void App::onSimulation(RealTime rdt, SimTime sdt, SimTime idt) {
         m_gui->setRect(Rect2D::xywh(oldRect.x0(), oldRect.y0(), oldRect.width(), float(window()->height())));
     }
 
-	// Update profiler GUI
+    // Update profiler GUI
     if (((m_demoSettings.globalIlluminationMode == DemoSettings::GlobalIlluminationMode::RADIOSITY) ||
          (m_demoSettings.globalIlluminationMode == DemoSettings::GlobalIlluminationMode::SPLIT_SCREEN)) && 
-		 Profiler::enabled()) {
+         Profiler::enabled()) {
 
         Array<const Array<Profiler::Event>*> eventTreeArray;
         Profiler::getEvents(eventTreeArray);
@@ -390,10 +390,10 @@ void App::deferredShade(RenderDevice* rd, const LightingEnvironment& environment
         environment.setShaderArgs(args);
         m_gbuffer->setShaderArgsRead(args, "gbuffer_"); 
 
-		args.setUniform("saturatedLightBoost",      m_deepGBufferRadiositySettings.saturatedBoost);
+        args.setUniform("saturatedLightBoost",      m_deepGBufferRadiositySettings.saturatedBoost);
         args.setUniform("unsaturatedLightBoost",    m_deepGBufferRadiositySettings.unsaturatedBoost);
-        args.setMacro("USE_INDIRECT",				m_deepGBufferRadiositySettings.enabled);
-		args.setMacro("NO_LIGHTPROBE",				(! m_demoSettings.lightProbeFallback) && (m_demoSettings.demoMode == DemoSettings::DemoMode::VARIATIONS));
+        args.setMacro("USE_INDIRECT",                m_deepGBufferRadiositySettings.enabled);
+        args.setMacro("NO_LIGHTPROBE",                (! m_demoSettings.lightProbeFallback) && (m_demoSettings.demoMode == DemoSettings::DemoMode::VARIATIONS));
 
         m_deepGBufferRadiosity->texture()->setShaderArgs(args, "indirectRadiosity_", Sampler::buffer());
         args.setRect(rd->viewport());
@@ -427,11 +427,14 @@ bool App::onEvent(const GEvent& event) {
 
 
 void App::forwardShade(RenderDevice* rd, Array<shared_ptr<Surface> >& all, const LightingEnvironment& environment) {
-    static const Array<shared_ptr<Surface> > noNewShadowCasters;
-    /*Surface::render(rd, activeCamera()->frame(), activeCamera()->projection(), all, 
+    /*static const Array<shared_ptr<Surface> > noNewShadowCasters;
+    Surface::render(rd, activeCamera()->frame(), activeCamera()->projection(), all, 
         noNewShadowCasters, environment, false, m_settings.hdrFramebuffer.depthGuardBandThickness - m_settings.hdrFramebuffer.colorGuardBandThickness);*/
 
     drawDebugShapes();
+    const shared_ptr<ThirdPersonManipulator> m = (notNull(developerWindow) && notNull(developerWindow->sceneEditorWindow)) ? developerWindow->sceneEditorWindow->getManipulator() : nullptr;
+    if (m && m->enabled())
+        m->render3D(rd);
 }
 
 
@@ -539,13 +542,13 @@ void App::onGraphics3D(RenderDevice* rd, Array<shared_ptr<Surface> >& all) {
         return;
     }
 
-	if (m_demoSettings.demoMode == DemoSettings::DemoMode::VARIATIONS) {
-		// Force the 
-		m_demoSettings.globalIlluminationMode = DemoSettings::GlobalIlluminationMode::RADIOSITY;
-		m_demoSettings.QualityPreset = DemoSettings::QualityPreset::BALANCED;
-	}
+    if (m_demoSettings.demoMode == DemoSettings::DemoMode::VARIATIONS) {
+        // Force the 
+        m_demoSettings.globalIlluminationMode = DemoSettings::GlobalIlluminationMode::RADIOSITY;
+        m_demoSettings.QualityPreset = DemoSettings::QualityPreset::BALANCED;
+    }
 
-	m_performancePane->setVisible(m_demoSettings.demoMode == DemoSettings::DemoMode::RADIOSITY);
+    m_performancePane->setVisible(m_demoSettings.demoMode == DemoSettings::DemoMode::RADIOSITY);
     m_controlLabel->setVisible(m_demoSettings.cameraMode == DemoSettings::CameraMode::FREE);
 
     m_gbuffer->setSpecification(m_gbufferSpecification);
@@ -631,7 +634,7 @@ void App::onGraphics3D(RenderDevice* rd, Array<shared_ptr<Surface> >& all) {
     rd->clear();
     FilmSettings filmSettings = activeCamera()->filmSettings();
     if (m_demoSettings.demoMode == DemoSettings::DemoMode::AO) {
-		// Override the film settings to visualize AO
+        // Override the film settings to visualize AO
         filmSettings.setBloomStrength(0.0);
         filmSettings.setIdentityToneCurve();
     }
@@ -640,28 +643,28 @@ void App::onGraphics3D(RenderDevice* rd, Array<shared_ptr<Surface> >& all) {
 
 
 void App::onGraphics2D(RenderDevice* rd, Array< shared_ptr< Surface2D > >& surface2D) {
-	if (m_demoSettings.demoMode == DemoSettings::DemoMode::AO) {
-		rd->setFramebuffer(m_osWindowDeviceFramebuffer);
-		const Point2 inColumnOffset(-10.0f, m_framebuffer->height() - float(settings().hdrFramebuffer.depthGuardBandThickness.y)*2.0f);
-		float columnWidth = ((float)m_framebuffer->width() - 2.0f * settings().hdrFramebuffer.depthGuardBandThickness.x) / 2.0f;
-		Point2 position = inColumnOffset;
-		position.x += columnWidth;
-		position.x += columnWidth;
-		m_captionFont->draw2D(rd, String("Raw ") + (m_demoSettings.twoLayerAO ? "2-Layer Deep G-Buffer" : "1-Layer") + String(" Ambient Occlusion"), 
-					position, 30, Color3::white(), Color3::black(), GFont::XALIGN_RIGHT, GFont::YALIGN_BOTTOM);
-	} else if (m_demoSettings.globalIlluminationMode == DemoSettings::GlobalIlluminationMode::SPLIT_SCREEN) {
-		const Point2 inColumnOffset(-10.0f, m_framebuffer->height() - float(settings().hdrFramebuffer.depthGuardBandThickness.y) * 2.0f);
-		float columnWidth = ((float)m_framebuffer->width() - 2.0f * settings().hdrFramebuffer.depthGuardBandThickness.x) / 2.0f;
+    if (m_demoSettings.demoMode == DemoSettings::DemoMode::AO) {
+        rd->setFramebuffer(m_osWindowDeviceFramebuffer);
+        const Point2 inColumnOffset(-10.0f, m_framebuffer->height() - float(settings().hdrFramebuffer.depthGuardBandThickness.y)*2.0f);
+        float columnWidth = ((float)m_framebuffer->width() - 2.0f * settings().hdrFramebuffer.depthGuardBandThickness.x) / 2.0f;
+        Point2 position = inColumnOffset;
+        position.x += columnWidth;
+        position.x += columnWidth;
+        m_captionFont->draw2D(rd, String("Raw ") + (m_demoSettings.twoLayerAO ? "2-Layer Deep G-Buffer" : "1-Layer") + String(" Ambient Occlusion"), 
+                    position, 30, Color3::white(), Color3::black(), GFont::XALIGN_RIGHT, GFont::YALIGN_BOTTOM);
+    } else if (m_demoSettings.globalIlluminationMode == DemoSettings::GlobalIlluminationMode::SPLIT_SCREEN) {
+        const Point2 inColumnOffset(-10.0f, m_framebuffer->height() - float(settings().hdrFramebuffer.depthGuardBandThickness.y) * 2.0f);
+        float columnWidth = ((float)m_framebuffer->width() - 2.0f * settings().hdrFramebuffer.depthGuardBandThickness.x) / 2.0f;
 
-		Point2 position = inColumnOffset;
-		position.x += columnWidth;
-		m_captionFont->draw2D(rd, "Prerendered Light Probe", 
-					position, 30, Color3::white(), Color3::black(), GFont::XALIGN_RIGHT, GFont::YALIGN_BOTTOM);
+        Point2 position = inColumnOffset;
+        position.x += columnWidth;
+        m_captionFont->draw2D(rd, "Prerendered Light Probe", 
+                    position, 30, Color3::white(), Color3::black(), GFont::XALIGN_RIGHT, GFont::YALIGN_BOTTOM);
 
-		position.x += columnWidth;
-		m_captionFont->draw2D(rd, "Deep G-Buffer Radiosity", 
-					position, 30, Color3::white(), Color3::black(), GFont::XALIGN_RIGHT, GFont::YALIGN_BOTTOM);
-	}
+        position.x += columnWidth;
+        m_captionFont->draw2D(rd, "Deep G-Buffer Radiosity", 
+                    position, 30, Color3::white(), Color3::black(), GFont::XALIGN_RIGHT, GFont::YALIGN_BOTTOM);
+    }
 
     GApp::onGraphics2D(rd, surface2D);
 }
@@ -684,34 +687,38 @@ void App::evaluateDemoSettings() {
     if ( ! m_demoSettings.advancedSettingsMode ) { // In advanced mode, you are allowed to tweak the settings yourself
 
         // Could be changed to happen on toggle instead of every frame
-        switch(m_demoSettings.QualityPreset) {
-        case DemoSettings::QualityPreset::MAX_PERFORMANCE:
-            m_deepGBufferRadiositySettings = m_maxPerformanceDeepGBufferRadiosityPresets;
-            break;
-
-		case DemoSettings::QualityPreset::BALANCED:
-            m_deepGBufferRadiositySettings = m_BALANCEDDeepGBufferRadiosityPresets;
-            break;
-
-        case DemoSettings::QualityPreset::MAX_QUALITY:
-            m_deepGBufferRadiositySettings = m_maxQualityDeepGBufferRadiosityPresets;
-            break;
+        static int preset = -1;
+        if (preset != m_demoSettings.QualityPreset) {
+            switch(m_demoSettings.QualityPreset) {
+            case DemoSettings::QualityPreset::MAX_PERFORMANCE:
+                m_deepGBufferRadiositySettings = m_maxPerformanceDeepGBufferRadiosityPresets;
+                break;
+            
+            case DemoSettings::QualityPreset::BALANCED:
+                m_deepGBufferRadiositySettings = m_BALANCEDDeepGBufferRadiosityPresets;
+                break;
+            
+            case DemoSettings::QualityPreset::MAX_QUALITY:
+                m_deepGBufferRadiositySettings = m_maxQualityDeepGBufferRadiosityPresets;
+                break;
+            }
+            preset = m_demoSettings.QualityPreset;
         }
 
-		m_deepGBufferRadiositySettings.useDepthPeelBuffer = m_demoSettings.twoLayerRadiosity || (m_demoSettings.demoMode != DemoSettings::DemoMode::VARIATIONS);
+        m_deepGBufferRadiositySettings.useDepthPeelBuffer = m_demoSettings.twoLayerRadiosity || (m_demoSettings.demoMode != DemoSettings::DemoMode::VARIATIONS);
 
         m_deepGBufferRadiositySettings.enabled =  
             (m_demoSettings.globalIlluminationMode == DemoSettings::GlobalIlluminationMode::RADIOSITY) ||
             (m_demoSettings.globalIlluminationMode == DemoSettings::GlobalIlluminationMode::SPLIT_SCREEN);
         
         AmbientOcclusionSettings& aoSettings = scene()->lightingEnvironment().ambientOcclusionSettings;
-		aoSettings.enabled             = m_demoSettings.aoEnabled || (m_demoSettings.demoMode != DemoSettings::DemoMode::VARIATIONS);
+        aoSettings.enabled             = m_demoSettings.aoEnabled || (m_demoSettings.demoMode != DemoSettings::DemoMode::VARIATIONS);
 
-		if (m_demoSettings.demoMode == DemoSettings::DemoMode::AO) {
-	        aoSettings.useDepthPeelBuffer  = m_demoSettings.twoLayerAO;
-		} else {
-	        aoSettings.useDepthPeelBuffer  = m_demoSettings.twoLayerRadiosity || (m_demoSettings.demoMode != DemoSettings::DemoMode::VARIATIONS);
-		}
+        if (m_demoSettings.demoMode == DemoSettings::DemoMode::AO) {
+            aoSettings.useDepthPeelBuffer  = m_demoSettings.twoLayerAO;
+        } else {
+            aoSettings.useDepthPeelBuffer  = m_demoSettings.twoLayerRadiosity || (m_demoSettings.demoMode != DemoSettings::DemoMode::VARIATIONS);
+        }
     }
 
 
@@ -737,26 +744,26 @@ void App::evaluateDemoSettings() {
     
     switch (m_demoSettings.cameraMode) {
     case DemoSettings::CameraMode::STATIC:
-		if (m_demoSettings.demoMode == DemoSettings::DemoMode::AO) {
-			setActiveCamera(scene()->typedEntity<Camera>("staticAOCamera"));
-		} else {
-			setActiveCamera(scene()->typedEntity<Camera>("staticStatueCamera"));
-		}
-		m_debugCamera->copyParametersFrom(activeCamera());
-		m_cameraManipulator->setFrame(activeCamera()->frame());
+        if (m_demoSettings.demoMode == DemoSettings::DemoMode::AO) {
+            setActiveCamera(scene()->typedEntity<Camera>("staticAOCamera"));
+        } else {
+            setActiveCamera(scene()->typedEntity<Camera>("staticStatueCamera"));
+        }
+        m_debugCamera->copyParametersFrom(activeCamera());
+        m_cameraManipulator->setFrame(activeCamera()->frame());
         break;
 
     case DemoSettings::CameraMode::DYNAMIC:
-		if (m_demoSettings.demoMode == DemoSettings::DemoMode::AO) {
-			setActiveCamera(scene()->typedEntity<Camera>("pillarStrafeCamera"));
-		} else {
-			setActiveCamera(scene()->typedEntity<Camera>("statuteStrafeCamera"));
-		}
-		m_debugCamera->copyParametersFrom(activeCamera());
-		m_cameraManipulator->setFrame(activeCamera()->frame());
+        if (m_demoSettings.demoMode == DemoSettings::DemoMode::AO) {
+            setActiveCamera(scene()->typedEntity<Camera>("pillarStrafeCamera"));
+        } else {
+            setActiveCamera(scene()->typedEntity<Camera>("statuteStrafeCamera"));
+        }
+        m_debugCamera->copyParametersFrom(activeCamera());
+        m_cameraManipulator->setFrame(activeCamera()->frame());
         break;
 
-	case DemoSettings::CameraMode::FREE:
+    case DemoSettings::CameraMode::FREE:
         setActiveCamera(m_debugCamera);
         break;
     }
@@ -782,9 +789,9 @@ bool App::DemoSettings::significantRadiosityDifferences(const DemoSettings& othe
     } 
 
     return  
-		(demoMode != other.demoMode) ||
-		(twoLayerAO != other.twoLayerAO) ||
-		(twoLayerRadiosity != other.twoLayerRadiosity) ||
+        (demoMode != other.demoMode) ||
+        (twoLayerAO != other.twoLayerAO) ||
+        (twoLayerRadiosity != other.twoLayerRadiosity) ||
         (dynamicLights != other.dynamicLights) ||
         (cameraMode != other.cameraMode);            
 }

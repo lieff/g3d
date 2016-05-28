@@ -65,7 +65,7 @@ GApp::Settings::Settings() :
     debugFontName("console-small.fnt"),
     logFilename("log.txt"),
     useDeveloperTools(true),
-    writeLicenseFile(true) {
+    writeLicenseFile(false) {
     initGLG3D();
 }
 

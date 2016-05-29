@@ -168,17 +168,16 @@ static void toMaterialSpecification(
 
     /** Lambertian */
     const String& diffuseFilename = getTextureFilename(aiTextureType_DIFFUSE, mat, basePath);
-    aiColor3D aiDiffuse;
-    mat->Get(AI_MATKEY_COLOR_DIFFUSE, aiDiffuse);
+    aiColor3D aiDiffuse = { 1.0f, 1.0f, 1.0f };
+    aiReturn ret = mat->Get(AI_MATKEY_COLOR_DIFFUSE, aiDiffuse);
     Color3 diffuseColor(aiDiffuse.r, aiDiffuse.g, aiDiffuse.b);
     if (diffuseFilename != "") {
-        aiTextureOp operation;
-        mat->Get(_AI_MATKEY_TEXOP_BASE, aiTextureType_DIFFUSE, 0, operation);
+        aiTextureOp operation = (aiTextureOp)-1;
+        ret = mat->Get(_AI_MATKEY_TEXOP_BASE, aiTextureType_DIFFUSE, 0, operation);
         // Necessary because ASSIMP doesn't necessarily return a valid enum value,
         // enums might be signed or unsigned, and we need to check for validity
-        int operationInt = (int)operation; 
         int textureCount = mat->GetTextureCount(aiTextureType_DIFFUSE);
-        if ((textureCount == 1) || ((operationInt > 5) || (operationInt < 0))) {
+        if ((textureCount == 1) || (ret != AI_SUCCESS || (unsigned int)operation > 5)) {
             Texture::Specification t(diffuseFilename, true);
             t.encoding.readMultiplyFirst = diffuseColor;
             spec.setLambertian(t);
@@ -196,16 +195,18 @@ static void toMaterialSpecification(
 
     // Emissive
     const String& emissiveFilename = getTextureFilename(aiTextureType_EMISSIVE, mat, basePath);
-    aiColor3D aiEmissive;
-    mat->Get(AI_MATKEY_COLOR_EMISSIVE, aiEmissive);
+    aiColor3D aiEmissive = { 0.0f, 0.0f, 0.0f };
+    ret = mat->Get(AI_MATKEY_COLOR_EMISSIVE, aiEmissive);
+    bool have_emissive = (ret == AI_SUCCESS);
     Color3 emissiveColor(aiEmissive.r, aiEmissive.g, aiEmissive.b);
     if (! emissiveFilename.empty()) {
-        aiTextureOp operation;
-        aiReturn ret = mat->Get(_AI_MATKEY_TEXOP_BASE, aiTextureType_EMISSIVE, 0, operation);
+        aiTextureOp operation = (aiTextureOp)-1;
+        ret = mat->Get(_AI_MATKEY_TEXOP_BASE, aiTextureType_EMISSIVE, 0, operation);
         int textureCount = mat->GetTextureCount(aiTextureType_EMISSIVE);
-        if ((textureCount == 1) || (ret != AI_SUCCESS || operation > 5)) {
+        if ((textureCount == 1) || (ret != AI_SUCCESS || (unsigned int)operation > 5)) {
             Texture::Specification s(emissiveFilename, true);
-            s.encoding.readMultiplyFirst = emissiveColor;
+            //if (have_emissive) // BUG: some fbx have black emissive color with good emissive texture
+            //    s.encoding.readMultiplyFirst = emissiveColor;
             spec.setEmissive(s);
         } else {
             spec.setEmissive(getCombinedTexture(emissiveColor, 
@@ -221,16 +222,16 @@ static void toMaterialSpecification(
 
 
     //only works for models that have set the same form of specular as g3d
-    aiShadingMode shademode;
-    mat->Get(AI_MATKEY_SHADING_MODEL, shademode);      
+    aiShadingMode shademode = (aiShadingMode)-1;
+    ret = mat->Get(AI_MATKEY_SHADING_MODEL, shademode);
     float exponentGlossy = 0;
-    mat->Get(AI_MATKEY_SHININESS, exponentGlossy);    
+    ret = mat->Get(AI_MATKEY_SHININESS, exponentGlossy);
     if ((shademode == aiShadingMode_Blinn) || (shademode == aiShadingMode_Phong) || (exponentGlossy != 0)) {
         /** glossy */        
         float scaleGlossy = 1;
-        mat->Get(AI_MATKEY_SHININESS_STRENGTH, scaleGlossy);
+        ret = mat->Get(AI_MATKEY_SHININESS_STRENGTH, scaleGlossy);
         aiColor3D aiSpecular;
-        mat->Get(AI_MATKEY_COLOR_SPECULAR, aiSpecular);
+        ret = mat->Get(AI_MATKEY_COLOR_SPECULAR, aiSpecular);
         
         const String& glossyFilename = getTextureFilename(aiTextureType_SPECULAR, mat, basePath);
         const String& shininessFilename = getTextureFilename(aiTextureType_SHININESS, mat, basePath);
@@ -262,17 +263,21 @@ static void toMaterialSpecification(
 
     // Transmissive
     const String& transmissiveFilename = getTextureFilename(aiTextureType_OPACITY, mat, basePath);
-    aiColor3D aiTransparent;
-    float     opacity;
-    mat->Get(AI_MATKEY_OPACITY, opacity);
-    mat->Get(AI_MATKEY_COLOR_TRANSPARENT, aiTransparent);
+    aiColor3D aiTransparent = { 0.0f, 0.0f, 0.0f };
+    float     opacity = 1.0f;
+    ret = mat->Get(AI_MATKEY_OPACITY, opacity);
+    aiReturn ret2 = mat->Get(AI_MATKEY_COLOR_TRANSPARENT, aiTransparent);
     transmissiveColor = Color3(aiTransparent.r, aiTransparent.g, aiTransparent.b) * opacity;
+    bool have_transmissive = (ret == AI_SUCCESS) || (ret2 == AI_SUCCESS);
     if (! transmissiveFilename.empty()) {
-        aiTextureOp operation;
-        aiReturn ret = mat->Get(_AI_MATKEY_TEXOP_BASE, aiTextureType_OPACITY, 0, operation);
+        aiTextureOp operation = (aiTextureOp)-1;
+        ret = mat->Get(_AI_MATKEY_TEXOP_BASE, aiTextureType_OPACITY, 0, operation);
         int textureCount = mat->GetTextureCount(aiTextureType_OPACITY);
-        if ((textureCount == 1) && (ret != AI_SUCCESS || operation > 5)) {
-            //spec.setTransmissive(transmissiveFilename, transmissiveColor);
+        if ((textureCount == 1) || (ret != AI_SUCCESS || (unsigned int)operation > 5)) {
+            Texture::Specification t(diffuseFilename, true);
+            if (have_transmissive)
+                t.encoding.readMultiplyFirst = transmissiveColor;
+            spec.setTransmissive(t);
         } else {
             spec.setTransmissive(getCombinedTexture(transmissiveColor, 
                                                     transmissiveFilename, 
@@ -579,7 +584,7 @@ public:
                 // Get position spline
                 for (unsigned int i = 0; i < aiChannel->mNumPositionKeys; ++i) {
                     getPoint3(currentPhysicsFrame.translation, aiChannel->mPositionKeys[i].mValue);
-                    if (positionSpline.time.size() && !(aiChannel->mPositionKeys[i].mTime > positionSpline.time.last()))
+                    if (positionSpline.time.size() && !fuzzyGt(aiChannel->mPositionKeys[i].mTime, positionSpline.time.last()))
                         continue; // in some fbx files double to float convestion makes next key time same
                     positionSpline.append(float(aiChannel->mPositionKeys[i].mTime), currentPhysicsFrame);
                 }
@@ -599,7 +604,7 @@ public:
                             currentPhysicsFrame.rotation /= currentPhysicsFrame.rotation.magnitude();
                         }
                     }
-                    if (rotationSpline.time.size() && !(aiChannel->mRotationKeys[i].mTime > rotationSpline.time.last()))
+                    if (rotationSpline.time.size() && !fuzzyGt(aiChannel->mRotationKeys[i].mTime, rotationSpline.time.last()))
                         continue; // in some fbx files double to float convestion makes next key time same
                     rotationSpline.append(float(aiChannel->mRotationKeys[i].mTime), currentPhysicsFrame);
                 }
